@@ -6,6 +6,7 @@ use XMLWriter;
 
 class Sitemap
 {
+	
     private $filePath;
     /**
      * @var bool if XML should be indented
