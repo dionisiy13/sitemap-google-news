@@ -24,6 +24,12 @@ Example of the sitemap from google
      <news:keywords>business, merger, acquisition, A, B</news:keywords>
      <news:stock_tickers>NASDAQ:A, NASDAQ:B</news:stock_tickers>
    </news:news>
+   <image:image>
+      <image:loc>https://example.com/image.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://example.com/photo.jpg</image:loc>
+    </image:image>
  </url>
 </urlset>
    ```
@@ -49,6 +55,7 @@ foreach ($posts as $item) {
     $sitemap->setName($siteName);
     $sitemap->setPublicationDate($item['publishAt']->getTimestamp());
     $sitemap->setTitle($item['title']);
+    $sitemap->setImages($item['images']);
     $sitemap->addItem();
 }
 $sitemap->write();
@@ -58,7 +65,7 @@ $sitemap->write();
 
 ```$pathToFile``` - where the file should apear. For example ```getcwd() . '/public' . '/sitemap_google_news.xml'```
 
-```$item['date']``` - should be timestamp
+```$item['date']``` - should be DateTime
 
 Tags and genres could be empty.
 
