@@ -6,8 +6,8 @@ use XMLWriter;
 
 class Sitemap
 {
-	
     private $filePath;
+
     /**
      * @var bool if XML should be indented
      */
@@ -17,17 +17,26 @@ class Sitemap
      * @var XMLWriter
      */
     private $writer;
+
     private $location;
+
     private $title;
+
     private $name;
+
     private $date;
+
     private $keywords;
+
     private $genres;
+
     private $lang;
+
+    private $images;
 
     /**
      * @param string $filePath path of the file to write to
-     * @param bool $useXhtml is XHTML namespace should be specified
+     * @param bool   $useXhtml is XHTML namespace should be specified
      *
      * @throws \InvalidArgumentException
      */
@@ -80,6 +89,15 @@ class Sitemap
     }
 
     /**
+     * @param array<string> $images Pass urls to the images
+     * @return void
+     */
+    public function setImages(array $images)
+    {
+        $this->images = $images;
+    }
+
+    /**
      * Creates new file
      * @throws \RuntimeException if file is not writeable
      */
@@ -101,7 +119,7 @@ class Sitemap
         $this->writer->startElement('urlset');
         $this->writer->writeAttribute('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9');
         $this->writer->writeAttribute('xmlns:news', 'http://www.google.com/schemas/sitemap-news/0.9');
-
+        $this->writer->writeAttribute('xmlns:image', 'http://www.google.com/schemas/sitemap-image/1.1');
     }
 
     /**
@@ -123,6 +141,7 @@ class Sitemap
     {
         $this->finishFile();
     }
+
     /**
      * Flushes buffer into file
      * @param bool $finishFile Pass true to close the file to write to, used only when useGzip is true
@@ -139,7 +158,8 @@ class Sitemap
      * @param string $location
      * @throws \InvalidArgumentException
      */
-    protected function validateLocation($location) {
+    protected function validateLocation($location)
+    {
         if (false === filter_var($location, FILTER_VALIDATE_URL)) {
             throw new \InvalidArgumentException(
                 "The location must be a valid URL. You have specified: {$location}."
@@ -157,21 +177,30 @@ class Sitemap
         $this->validateLocation($this->location);
 
         $this->writer->startElement('url');
-            $this->writer->writeElement('loc', $this->location);
-            $this->writer->startElement('news:news');
-                $this->writer->startElement('news:publication');
-                    $this->writer->writeElement('news:name', $this->name);
-                    $this->writer->writeElement('news:language', $this->lang);
+        $this->writer->writeElement('loc', $this->location);
+        $this->writer->startElement('news:news');
+        $this->writer->startElement('news:publication');
+        $this->writer->writeElement('news:name', $this->name);
+        $this->writer->writeElement('news:language', $this->lang);
+        $this->writer->endElement();
+        if (!empty($this->genres)) {
+            $this->writer->writeElement('news:genres', $this->genres);
+        }
+        $this->writer->writeElement('news:publication_date', date('c', $this->date));
+        $this->writer->writeElement('news:title', $this->title);
+        if (!empty($this->keywords)) {
+            $this->writer->writeElement('news:keywords', implode(", ", $this->keywords));
+        }
+        $this->writer->endElement();
+
+        if (!empty($this->images)) {
+            foreach ($this->images as $image) {
+                $this->writer->startElement('image:image');
+                $this->writer->writeElement('image:loc', $image);
                 $this->writer->endElement();
-                if (!empty($this->genres)) {
-                    $this->writer->writeElement('news:genres', $this->genres);
-                }
-                $this->writer->writeElement('news:publication_date', date('c', $this->date));
-                $this->writer->writeElement('news:title', $this->title);
-                if (!empty($this->keywords)) {
-                    $this->writer->writeElement('news:keywords', implode(", ",$this->keywords));
-                }
-            $this->writer->endElement();
+            }
+        }
+
         $this->writer->endElement();
     }
 }
